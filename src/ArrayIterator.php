@@ -27,6 +27,14 @@ class ArrayIterator implements ArrayAccess, Countable, Iterator
 	}
 
 	/**
+	 * @return array
+	 */
+	function toArray() : array
+	{
+		return $this->array;
+	}
+
+	/**
 	 * @return void
 	 */
 	function rewind() : void
