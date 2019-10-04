@@ -1,0 +1,16 @@
+{
+	"name": "kucbel/iterators",
+	"description": "Assorted iterators",
+	"homepage": "https://bitbucket.org/kucbel/iterators/",
+	"authors": [{
+		"name": "David Kucbel",
+		"homepage": "https://bitbucket.org/kucbel/"
+	}],
+	"require": {
+		"php": "^7.1",
+		"nette/utils": "^3.0"
+	},
+	"autoload": {
+		"classmap": ["src"]
+	}
+}
