@@ -34,6 +34,11 @@ class ModifyIterator implements Countable, Iterator
 	protected $cache = [ false, null, null ];
 
 	/**
+	 * @var int
+	 */
+	protected $round = 0;
+
+	/**
 	 * ModifyIterator constructor.
 	 *
 	 * @param iterable $array
@@ -43,7 +48,7 @@ class ModifyIterator implements Countable, Iterator
 	function __construct( iterable $array, callable $value = null, callable $index = null )
 	{
 		if( !$value and !$index ) {
-			throw new InvalidArgumentException("Callback must be provided.");
+			throw new InvalidArgumentException("Provide at least one callback.");
 		}
 
 		if( is_array( $array )) {
@@ -68,7 +73,7 @@ class ModifyIterator implements Countable, Iterator
 			$value = $this->array->current();
 			$index = $this->array->key();
 
-			$this->cache = [ true, ( $this->value )( $value, $index ), ( $this->index )( $value, $index ) ];
+			$this->cache = [ true, ( $this->value )( $value, $index ), ( $this->index )( $value, $index ) ?? $this->round ];
 		} else {
 			$this->cache = [ false, null, null ];
 		}
@@ -81,6 +86,8 @@ class ModifyIterator implements Countable, Iterator
 	{
 		$this->array->rewind();
 
+		$this->round = 0;
+
 		$this->fetch();
 	}
 
@@ -90,6 +97,8 @@ class ModifyIterator implements Countable, Iterator
 	function next() : void
 	{
 		$this->array->next();
+
+		$this->round++;
 
 		$this->fetch();
 	}
