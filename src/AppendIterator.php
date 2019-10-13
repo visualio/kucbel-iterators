@@ -180,4 +180,12 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	{
 		throw new MemberAccessException("This is AppendIterator.");
 	}
+
+	/**
+	 * @return array
+	 */
+	function toArray() : array
+	{
+		return iterator_to_array( $this );
+	}
 }

@@ -141,4 +141,12 @@ class ChunkIterator implements Countable, Iterator
 
 		return ceil( $this->array->count() / $this->count );
 	}
+
+	/**
+	 * @return array
+	 */
+	function toArray() : array
+	{
+		return iterator_to_array( $this );
+	}
 }

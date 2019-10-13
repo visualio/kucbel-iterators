@@ -127,4 +127,12 @@ class FilterIterator implements Countable, Iterator
 
 		return $this->array->count();
 	}
+
+	/**
+	 * @return array
+	 */
+	function toArray() : array
+	{
+		return iterator_to_array( $this );
+	}
 }
