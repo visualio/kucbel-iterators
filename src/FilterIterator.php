@@ -5,7 +5,6 @@ namespace Kucbel\Iterators;
 use Countable;
 use Iterator;
 use IteratorAggregate;
-use Nette\InvalidStateException;
 use Nette\SmartObject;
 
 class FilterIterator implements Countable, Iterator
@@ -121,11 +120,7 @@ class FilterIterator implements Countable, Iterator
 	 */
 	function count() : int
 	{
-		if( !$this->array instanceof Countable ) {
-			throw new InvalidStateException("Iterator isn't countable.");
-		}
-
-		return $this->array->count();
+		return count( $this->toArray() );
 	}
 
 	/**
