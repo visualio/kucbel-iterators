@@ -13,6 +13,10 @@ class ChunkIterator implements Countable, Iterator
 {
 	use SmartObject;
 
+	const
+		INDEXED		= 0b1,
+		COUNTED		= 0b10;
+
 	/**
 	 * @var Iterator
 	 */
@@ -31,18 +35,24 @@ class ChunkIterator implements Countable, Iterator
 	/**
 	 * @var int
 	 */
-	protected $index = 0;
+	protected $setup;
+
+	/**
+	 * @var int
+	 */
+	protected $round = 0;
 
 	/**
 	 * ChunkIterator constructor.
 	 *
 	 * @param iterable $array
 	 * @param int $count
+	 * @param int $setup
 	 */
-	function __construct( iterable $array, int $count = 100 )
+	function __construct( iterable $array, int $count = 100, int $setup = self::COUNTED )
 	{
 		if( $count < 2 ) {
-			throw new InvalidArgumentException;
+			throw new InvalidArgumentException("Chunk must contain at least 2 values.");
 		}
 
 		if( is_array( $array )) {
@@ -55,6 +65,7 @@ class ChunkIterator implements Countable, Iterator
 
 		$this->array = $array;
 		$this->count = $count;
+		$this->setup = $setup;
 	}
 
 	/**
@@ -64,19 +75,22 @@ class ChunkIterator implements Countable, Iterator
 	{
 		$cache = null;
 
-		for( $count = $this->count; $count > 0; $count-- ) {
+		for( $count = 0; $count < $this->count; $count++ ) {
+			if( $count ) {
+				$this->array->next();
+			}
+
 			if( !$this->array->valid() ) {
 				break;
 			}
 
-			$index = $this->array->key();
-			$value = $this->array->current();
-
-			$cache[ $index ] = $value;
-
-			if( $count > 1 ) {
-				$this->array->next();
+			if( $this->setup & self::INDEXED ) {
+				$index = $this->array->key();
+			} else {
+				$index = $count;
 			}
+
+			$cache[ $index ] = $this->array->current();
 		}
 
 		$this->cache = $cache;
@@ -89,7 +103,7 @@ class ChunkIterator implements Countable, Iterator
 	{
 		$this->array->rewind();
 
-		$this->index = 0;
+		$this->round = 0;
 
 		$this->fetch();
 	}
@@ -101,7 +115,7 @@ class ChunkIterator implements Countable, Iterator
 	{
 		$this->array->next();
 
-		$this->index++;
+		$this->round++;
 
 		$this->fetch();
 	}
@@ -127,7 +141,7 @@ class ChunkIterator implements Countable, Iterator
 	 */
 	function key()
 	{
-		return $this->index;
+		return $this->round;
 	}
 
 	/**

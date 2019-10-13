@@ -48,7 +48,7 @@ class ModifyIterator implements Countable, Iterator
 	function __construct( iterable $array, callable $value = null, callable $index = null )
 	{
 		if( !$value and !$index ) {
-			throw new InvalidArgumentException("Provide at least one callback.");
+			throw new InvalidArgumentException("Callback must be provided.");
 		}
 
 		if( is_array( $array )) {
