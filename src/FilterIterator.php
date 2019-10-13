@@ -33,7 +33,7 @@ class FilterIterator implements Countable, Iterator
 	 * @param iterable $array
 	 * @param callable $match
 	 */
-	function __construct( iterable $array, callable $match )
+	function __construct( iterable $array, callable $match = null )
 	{
 		if( is_array( $array )) {
 			$array = new ArrayIterator( $array );
@@ -44,7 +44,7 @@ class FilterIterator implements Countable, Iterator
 		}
 
 		$this->array = $array;
-		$this->match = $match;
+		$this->match = $match ?? function( $value ) { return isset( $value ); };
 	}
 
 	/**
