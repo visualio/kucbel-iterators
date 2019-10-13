@@ -27,14 +27,6 @@ class ArrayIterator implements ArrayAccess, Countable, Iterator
 	}
 
 	/**
-	 * @return array
-	 */
-	function toArray() : array
-	{
-		return $this->array;
-	}
-
-	/**
 	 * @return void
 	 */
 	function rewind() : void
@@ -119,5 +111,13 @@ class ArrayIterator implements ArrayAccess, Countable, Iterator
 	function offsetUnset( $offset ) : void
 	{
 		unset( $this->array[ $offset ] );
+	}
+
+	/**
+	 * @return array
+	 */
+	function toArray() : array
+	{
+		return $this->array;
 	}
 }

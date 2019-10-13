@@ -70,10 +70,9 @@ class ModifyIterator implements Countable, Iterator
 	protected function fetch() : void
 	{
 		if( $this->array->valid() ) {
-			$value = $this->array->current();
-			$index = $this->array->key();
+			$argues = [ $this->array->current(), $this->array->key(), $this->round ];
 
-			$this->cache = [ true, ( $this->value )( $value, $index ), ( $this->index )( $value, $index ) ?? $this->round ];
+			$this->cache = [ true, ( $this->value )( ...$argues ), ( $this->index )( ...$argues ) ];
 		} else {
 			$this->cache = [ false, null, null ];
 		}
