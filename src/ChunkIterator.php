@@ -68,6 +68,16 @@ class ChunkIterator implements Countable, Iterator
 	}
 
 	/**
+	 * ChunkIterator cloner.
+	 */
+	function __clone()
+	{
+		$this->array = clone $this->array;
+		$this->round =
+		$this->cache = null;
+	}
+
+	/**
 	 * @return array | null
 	 */
 	protected function fetch() : ?array

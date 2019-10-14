@@ -58,6 +58,23 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	}
 
 	/**
+	 * AppendIterator cloner.
+	 */
+	function __clone()
+	{
+		$queue = [];
+
+		foreach( $this->queue as $array ) {
+			$queue[] = clone $array;
+		}
+
+		$this->queue = $queue;
+		$this->array =
+		$this->empty = new ArrayIterator;
+		$this->index = null;
+	}
+
+	/**
 	 * @return void
 	 */
 	function rewind() : void

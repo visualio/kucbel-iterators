@@ -47,6 +47,15 @@ class FilterIterator implements Countable, Iterator
 	}
 
 	/**
+	 * FilterIterator cloner.
+	 */
+	function __clone()
+	{
+		$this->array = clone $this->array;
+		$this->cache = null;
+	}
+
+	/**
 	 * @return array | null
 	 */
 	protected function fetch() : ?array
