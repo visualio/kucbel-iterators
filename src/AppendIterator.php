@@ -7,7 +7,6 @@ use Countable;
 use Iterator;
 use IteratorAggregate;
 use Nette\InvalidArgumentException;
-use Nette\InvalidStateException;
 use Nette\MemberAccessException;
 use Nette\SmartObject;
 
@@ -31,9 +30,9 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	protected $empty;
 
 	/**
-	 * @var int
+	 * @var int | null
 	 */
-	protected $index = 0;
+	protected $index;
 
 	/**
 	 * AppendIterator constructor.
@@ -122,11 +121,11 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 		$count = 0;
 
 		foreach( $this->queue as $i => $array ) {
-			if( !$array instanceof Countable ) {
-				throw new InvalidStateException("Iterator #{$i} isn't countable.");
+			if( $array instanceof Countable ) {
+				$count += $array->count();
+			} else {
+				$count += count( iterator_to_array( $array ));
 			}
-
-			$count += $array->count();
 		}
 
 		return $count;

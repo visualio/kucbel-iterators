@@ -6,7 +6,6 @@ use Countable;
 use Iterator;
 use IteratorAggregate;
 use Nette\InvalidArgumentException;
-use Nette\InvalidStateException;
 use Nette\SmartObject;
 
 class ModifyIterator implements Countable, Iterator
@@ -29,14 +28,14 @@ class ModifyIterator implements Countable, Iterator
 	protected $index;
 
 	/**
-	 * @var array
+	 * @var int | null
 	 */
-	protected $cache = [ false, null, null ];
+	protected $round;
 
 	/**
-	 * @var int
+	 * @var array | null
 	 */
-	protected $round = 0;
+	protected $cache;
 
 	/**
 	 * ModifyIterator constructor.
@@ -65,16 +64,14 @@ class ModifyIterator implements Countable, Iterator
 	}
 
 	/**
-	 * @return void
+	 * @return array | null
 	 */
-	protected function fetch() : void
+	protected function fetch() : ?array
 	{
 		if( $this->array->valid() ) {
-			$argues = [ $this->array->current(), $this->array->key(), $this->round ];
-
-			$this->cache = [ true, ( $this->value )( ...$argues ), ( $this->index )( ...$argues ) ];
+			return [ $this->array->current(), $this->array->key(), $this->round ];
 		} else {
-			$this->cache = [ false, null, null ];
+			return null;
 		}
 	}
 
@@ -86,8 +83,7 @@ class ModifyIterator implements Countable, Iterator
 		$this->array->rewind();
 
 		$this->round = 0;
-
-		$this->fetch();
+		$this->cache = $this->fetch();
 	}
 
 	/**
@@ -98,8 +94,7 @@ class ModifyIterator implements Countable, Iterator
 		$this->array->next();
 
 		$this->round++;
-
-		$this->fetch();
+		$this->cache = $this->fetch();
 	}
 
 	/**
@@ -107,7 +102,7 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function valid() : bool
 	{
-		return $this->cache[0];
+		return isset( $this->cache );
 	}
 
 	/**
@@ -115,7 +110,7 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function current()
 	{
-		return $this->cache[1];
+		return ( $this->value )( ...$this->cache );
 	}
 
 	/**
@@ -123,7 +118,7 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function key()
 	{
-		return $this->cache[2];
+		return ( $this->index )( ...$this->cache );
 	}
 
 	/**
@@ -131,11 +126,11 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function count() : int
 	{
-		if( !$this->array instanceof Countable ) {
-			throw new InvalidStateException("Iterator isn't countable.");
+		if( $this->array instanceof Countable ) {
+			return $this->array->count();
+		} else {
+			return count( iterator_to_array( $this ));
 		}
-
-		return $this->array->count();
 	}
 
 	/**

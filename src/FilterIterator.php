@@ -22,9 +22,9 @@ class FilterIterator implements Countable, Iterator
 	protected $match;
 
 	/**
-	 * @var array
+	 * @var array | null
 	 */
-	protected $cache = [ false, null, null ];
+	protected $cache;
 
 	/**
 	 * FilterIterator constructor.
@@ -47,28 +47,21 @@ class FilterIterator implements Countable, Iterator
 	}
 
 	/**
-	 * @return void
+	 * @return array | null
 	 */
-	protected function fetch() : void
+	protected function fetch() : ?array
 	{
-		$match = false;
-
 		while( $this->array->valid() ) {
-			$value = $this->array->current();
-			$index = $this->array->key();
+			$cache = [ $this->array->current(), $this->array->key() ];
 
-			if( $match = (bool) ( $this->match )( $value, $index )) {
-				break;
+			if(( $this->match )( ...$cache )) {
+				return $cache;
 			}
 
 			$this->array->next();
 		}
 
-		if( $match ) {
-			$this->cache = [ true, $value, $index ];
-		} else {
-			$this->cache = [ false, null, null ];
-		}
+		return null;
 	}
 
 	/**
@@ -78,7 +71,7 @@ class FilterIterator implements Countable, Iterator
 	{
 		$this->array->rewind();
 
-		$this->fetch();
+		$this->cache = $this->fetch();
 	}
 
 	/**
@@ -88,7 +81,7 @@ class FilterIterator implements Countable, Iterator
 	{
 		$this->array->next();
 
-		$this->fetch();
+		$this->cache = $this->fetch();
 	}
 
 	/**
@@ -96,7 +89,7 @@ class FilterIterator implements Countable, Iterator
 	 */
 	function valid() : bool
 	{
-		return $this->cache[0];
+		return isset( $this->cache );
 	}
 
 	/**
@@ -104,7 +97,7 @@ class FilterIterator implements Countable, Iterator
 	 */
 	function current()
 	{
-		return $this->cache[1];
+		return $this->cache[0];
 	}
 
 	/**
@@ -112,7 +105,7 @@ class FilterIterator implements Countable, Iterator
 	 */
 	function key()
 	{
-		return $this->cache[2];
+		return $this->cache[1];
 	}
 
 	/**
@@ -120,7 +113,7 @@ class FilterIterator implements Countable, Iterator
 	 */
 	function count() : int
 	{
-		return count( $this->toArray() );
+		return count( iterator_to_array( $this ));
 	}
 
 	/**

@@ -6,7 +6,6 @@ use Countable;
 use Iterator;
 use IteratorAggregate;
 use Nette\InvalidArgumentException;
-use Nette\InvalidStateException;
 use Nette\SmartObject;
 
 class ChunkIterator implements Countable, Iterator
@@ -23,14 +22,9 @@ class ChunkIterator implements Countable, Iterator
 	protected $array;
 
 	/**
-	 * @var array | null
-	 */
-	protected $cache;
-
-	/**
 	 * @var int
 	 */
-	protected $count;
+	protected $batch;
 
 	/**
 	 * @var int
@@ -38,20 +32,25 @@ class ChunkIterator implements Countable, Iterator
 	protected $setup;
 
 	/**
-	 * @var int
+	 * @var int | null
 	 */
-	protected $round = 0;
+	protected $round;
+
+	/**
+	 * @var array | null
+	 */
+	protected $cache;
 
 	/**
 	 * ChunkIterator constructor.
 	 *
 	 * @param iterable $array
-	 * @param int $count
+	 * @param int $batch
 	 * @param int $setup
 	 */
-	function __construct( iterable $array, int $count = 100, int $setup = self::COUNTED )
+	function __construct( iterable $array, int $batch = 100, int $setup = self::COUNTED )
 	{
-		if( $count < 2 ) {
+		if( $batch < 2 ) {
 			throw new InvalidArgumentException("Chunk must contain at least 2 values.");
 		}
 
@@ -64,36 +63,30 @@ class ChunkIterator implements Countable, Iterator
 		}
 
 		$this->array = $array;
-		$this->count = $count;
+		$this->batch = $batch;
 		$this->setup = $setup;
 	}
 
 	/**
-	 * @return void
+	 * @return array | null
 	 */
-	protected function fetch() : void
+	protected function fetch() : ?array
 	{
+		$setup = $this->setup & self::COUNTED;
+		$count = 0;
 		$cache = null;
 
-		for( $count = 0; $count < $this->count; $count++ ) {
-			if( $count ) {
-				$this->array->next();
-			}
+		while( $this->array->valid() ) {
+			$cache[ $setup ? $count : $this->array->key() ] = $this->array->current();
 
-			if( !$this->array->valid() ) {
+			if( ++$count === $this->batch ) {
 				break;
 			}
 
-			if( $this->setup & self::INDEXED ) {
-				$index = $this->array->key();
-			} else {
-				$index = $count;
-			}
-
-			$cache[ $index ] = $this->array->current();
+			$this->array->next();
 		}
 
-		$this->cache = $cache;
+		return $cache;
 	}
 
 	/**
@@ -104,8 +97,7 @@ class ChunkIterator implements Countable, Iterator
 		$this->array->rewind();
 
 		$this->round = 0;
-
-		$this->fetch();
+		$this->cache = $this->fetch();
 	}
 
 	/**
@@ -116,8 +108,7 @@ class ChunkIterator implements Countable, Iterator
 		$this->array->next();
 
 		$this->round++;
-
-		$this->fetch();
+		$this->cache = $this->fetch();
 	}
 
 	/**
@@ -125,7 +116,7 @@ class ChunkIterator implements Countable, Iterator
 	 */
 	function valid() : bool
 	{
-		return $this->cache !== null;
+		return isset( $this->cache );
 	}
 
 	/**
@@ -149,11 +140,13 @@ class ChunkIterator implements Countable, Iterator
 	 */
 	function count() : int
 	{
-		if( !$this->array instanceof Countable ) {
-			throw new InvalidStateException("Iterator isn't countable.");
+		if( $this->array instanceof Countable ) {
+			$count = $this->array->count();
+		} else {
+			$count = count( iterator_to_array( $this ));
 		}
 
-		return ceil( $this->array->count() / $this->count );
+		return ceil( $count / $this->batch );
 	}
 
 	/**
