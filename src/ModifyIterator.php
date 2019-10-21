@@ -13,7 +13,7 @@ class ModifyIterator implements Countable, Iterator
 	use SmartObject;
 
 	/**
-	 * @var Iterator
+	 * @var Iterator | IteratorAggregate
 	 */
 	protected $array;
 
@@ -54,10 +54,6 @@ class ModifyIterator implements Countable, Iterator
 			$array = new ArrayIterator( $array );
 		}
 
-		while( $array instanceof IteratorAggregate ) {
-			$array = $array->getIterator();
-		}
-
 		$this->array = $array;
 		$this->value = $value ?? function( $value ) { return $value; };
 		$this->index = $index ?? function( $value, $index ) { return $index; };
@@ -90,6 +86,10 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function rewind() : void
 	{
+		while( $this->array instanceof IteratorAggregate ) {
+			$this->array = $this->array->getIterator();
+		}
+
 		$this->array->rewind();
 
 		$this->round = 0;

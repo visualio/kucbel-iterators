@@ -12,7 +12,7 @@ class FilterIterator implements Countable, Iterator
 	use SmartObject;
 
 	/**
-	 * @var Iterator
+	 * @var Iterator | IteratorAggregate
 	 */
 	protected $array;
 
@@ -36,10 +36,6 @@ class FilterIterator implements Countable, Iterator
 	{
 		if( is_array( $array )) {
 			$array = new ArrayIterator( $array );
-		}
-
-		while( $array instanceof IteratorAggregate ) {
-			$array = $array->getIterator();
 		}
 
 		$this->array = $array;
@@ -78,6 +74,10 @@ class FilterIterator implements Countable, Iterator
 	 */
 	function rewind() : void
 	{
+		while( $this->array instanceof IteratorAggregate ) {
+			$this->array = $this->array->getIterator();
+		}
+
 		$this->array->rewind();
 
 		$this->cache = $this->fetch();

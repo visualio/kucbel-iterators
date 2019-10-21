@@ -17,7 +17,7 @@ class ChunkIterator implements Countable, Iterator
 		COUNTED		= 0b10;
 
 	/**
-	 * @var Iterator
+	 * @var Iterator | IteratorAggregate
 	 */
 	protected $array;
 
@@ -56,10 +56,6 @@ class ChunkIterator implements Countable, Iterator
 
 		if( is_array( $array )) {
 			$array = new ArrayIterator( $array );
-		}
-
-		while( $array instanceof IteratorAggregate ) {
-			$array = $array->getIterator();
 		}
 
 		$this->array = $array;
@@ -104,6 +100,10 @@ class ChunkIterator implements Countable, Iterator
 	 */
 	function rewind() : void
 	{
+		while( $this->array instanceof IteratorAggregate ) {
+			$this->array = $this->array->getIterator();
+		}
+
 		$this->array->rewind();
 
 		$this->round = 0;

@@ -7,7 +7,6 @@ use Countable;
 use Iterator;
 use IteratorAggregate;
 use Nette\InvalidArgumentException;
-use Nette\MemberAccessException;
 use Nette\SmartObject;
 
 class AppendIterator implements ArrayAccess, Countable, Iterator
@@ -15,7 +14,7 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	use SmartObject;
 
 	/**
-	 * @var Iterator[]
+	 * @var Iterator[] | IteratorAggregate[]
 	 */
 	protected $queue = [];
 
@@ -46,10 +45,6 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 				$array = new ArrayIterator( $array );
 			}
 
-			while( $array instanceof IteratorAggregate ) {
-				$array = $array->getIterator();
-			}
-
 			$this->queue[] = $array;
 		}
 
@@ -75,13 +70,31 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	}
 
 	/**
+	 * @return Iterator | null
+	 */
+	protected function fetch() : ?Iterator
+	{
+		$array = $this->queue[ $this->index ] ?? null;
+
+		if( $array ) {
+			while( $array instanceof IteratorAggregate ) {
+				$array = $array->getIterator();
+			}
+
+			return $this->queue[ $this->index ] = $array;
+		} else {
+			return null;
+		}
+	}
+
+	/**
 	 * @return void
 	 */
 	function rewind() : void
 	{
 		$this->index = 0;
 
-		if( $this->array = $this->queue[ $this->index ] ?? null ) {
+		if( $this->array = $this->fetch() ) {
 			$this->array->rewind();
 		} else {
 			$this->array = $this->empty;
@@ -96,7 +109,9 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 		$this->array->next();
 
 		while( !$this->array->valid() ) {
-			if( $this->array = $this->queue[ ++$this->index ] ?? null ) {
+			$this->index++;
+
+			if( $this->array = $this->fetch() ) {
 				$this->array->rewind();
 			} else {
 				$this->array = $this->empty;
@@ -137,7 +152,7 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	{
 		$count = 0;
 
-		foreach( $this->queue as $i => $array ) {
+		foreach( $this->queue as $array ) {
 			if( $array instanceof Countable ) {
 				$count += $array->count();
 			} else {
@@ -182,10 +197,6 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 			$value = new ArrayIterator( $value );
 		}
 
-		while( $value instanceof IteratorAggregate ) {
-			$value = $value->getIterator();
-		}
-
 		$this->queue[] = $value;
 	}
 
@@ -194,7 +205,7 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	 */
 	function offsetUnset( $offset )
 	{
-		throw new MemberAccessException("This is AppendIterator.");
+		unset( $this->queue[ $offset ] );
 	}
 
 	/**
