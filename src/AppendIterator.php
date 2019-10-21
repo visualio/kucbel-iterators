@@ -7,6 +7,7 @@ use Countable;
 use Iterator;
 use IteratorAggregate;
 use Nette\InvalidArgumentException;
+use Nette\MemberAccessException;
 use Nette\SmartObject;
 
 class AppendIterator implements ArrayAccess, Countable, Iterator
@@ -205,7 +206,7 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	 */
 	function offsetUnset( $offset )
 	{
-		unset( $this->queue[ $offset ] );
+		throw new MemberAccessException("This is AppendIterator.");
 	}
 
 	/**
