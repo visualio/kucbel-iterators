@@ -139,7 +139,7 @@ class ModifyIterator implements Countable, Iterator
 		if( $this->array instanceof Countable ) {
 			return $this->array->count();
 		} else {
-			return count( iterator_to_array( $this ));
+			return iterator_count( $this );
 		}
 	}
 

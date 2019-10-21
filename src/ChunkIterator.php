@@ -153,7 +153,7 @@ class ChunkIterator implements Countable, Iterator
 		if( $this->array instanceof Countable ) {
 			$count = $this->array->count();
 		} else {
-			$count = count( iterator_to_array( $this ));
+			$count = iterator_count( $this );
 		}
 
 		return ceil( $count / $this->batch );

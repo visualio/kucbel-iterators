@@ -156,7 +156,7 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 			if( $array instanceof Countable ) {
 				$count += $array->count();
 			} else {
-				$count += count( iterator_to_array( $array ));
+				$count += iterator_count( $array );
 			}
 		}
 

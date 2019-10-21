@@ -122,7 +122,7 @@ class FilterIterator implements Countable, Iterator
 	 */
 	function count() : int
 	{
-		return count( iterator_to_array( $this ));
+		return iterator_count( $this );
 	}
 
 	/**
