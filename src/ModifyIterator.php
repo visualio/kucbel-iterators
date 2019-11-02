@@ -18,19 +18,14 @@ class ModifyIterator implements Countable, Iterator
 	protected $array;
 
 	/**
-	 * @var callable
+	 * @var callable[]
 	 */
-	protected $value;
-
-	/**
-	 * @var callable
-	 */
-	protected $index;
+	protected $alter;
 
 	/**
 	 * @var int | null
 	 */
-	protected $round;
+	protected $index;
 
 	/**
 	 * @var array | null
@@ -55,8 +50,8 @@ class ModifyIterator implements Countable, Iterator
 		}
 
 		$this->array = $array;
-		$this->value = $value ?? function( $value ) { return $value; };
-		$this->index = $index ?? function( $value, $index ) { return $index; };
+		$this->alter[] = $value ?? function( $value ) { return $value; };
+		$this->alter[] = $index ?? function( $value, $index ) { return $index; };
 	}
 
 	/**
@@ -64,8 +59,7 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function __clone()
 	{
-		$this->array = clone $this->array;
-		$this->round =
+		$this->index =
 		$this->cache = null;
 	}
 
@@ -75,7 +69,7 @@ class ModifyIterator implements Countable, Iterator
 	protected function fetch() : ?array
 	{
 		if( $this->array->valid() ) {
-			return [ $this->array->current(), $this->array->key(), $this->round ];
+			return [ $this->array->current(), $this->array->key(), $this->index ];
 		} else {
 			return null;
 		}
@@ -92,7 +86,7 @@ class ModifyIterator implements Countable, Iterator
 
 		$this->array->rewind();
 
-		$this->round = 0;
+		$this->index = 0;
 		$this->cache = $this->fetch();
 	}
 
@@ -103,7 +97,7 @@ class ModifyIterator implements Countable, Iterator
 	{
 		$this->array->next();
 
-		$this->round++;
+		$this->index++;
 		$this->cache = $this->fetch();
 	}
 
@@ -120,7 +114,7 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function current()
 	{
-		return ( $this->value )( ...$this->cache );
+		return ( $this->alter[0] )( ...$this->cache );
 	}
 
 	/**
@@ -128,7 +122,7 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function key()
 	{
-		return ( $this->index )( ...$this->cache );
+		return ( $this->alter[1] )( ...$this->cache );
 	}
 
 	/**

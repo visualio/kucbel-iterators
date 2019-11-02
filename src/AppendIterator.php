@@ -50,7 +50,7 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 		}
 
 		$this->array =
-		$this->empty = new ArrayIterator;
+		$this->empty = new VoidIterator;
 	}
 
 	/**
@@ -58,16 +58,8 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	 */
 	function __clone()
 	{
-		$queue = [];
-
-		foreach( $this->queue as $array ) {
-			$queue[] = clone $array;
-		}
-
-		$this->queue = $queue;
-		$this->array =
-		$this->empty = new ArrayIterator;
 		$this->index = null;
+		$this->array = $this->empty;
 	}
 
 	/**
