@@ -51,7 +51,7 @@ class ChunkIterator implements Countable, Iterator
 	function __construct( iterable $array, int $count = 100, int $setup = self::COUNTED )
 	{
 		if( $count < 2 ) {
-			throw new InvalidArgumentException("Chunk must contain at least 2 values.");
+			throw new InvalidArgumentException("Count must be 2 or greater.");
 		}
 
 		if( is_array( $array )) {
