@@ -18,19 +18,21 @@ class ModifyIterator implements Countable, Iterator
 	protected $array;
 
 	/**
-	 * @var callable[]
+	 * @var callable[] | null[]
 	 */
 	protected $alter;
 
 	/**
-	 * @var int | null
+	 * @var int
 	 */
-	protected $index;
+	protected $index = 0;
 
 	/**
-	 * @var array | null
+	 * Exist, Map value, Map index, New value, New index, Old value, Old index
+	 *
+	 * @var array
 	 */
-	protected $cache;
+	protected $cache = [ false, false, false, null, null ];
 
 	/**
 	 * ModifyIterator constructor.
@@ -50,8 +52,7 @@ class ModifyIterator implements Countable, Iterator
 		}
 
 		$this->array = $array;
-		$this->alter[] = $value ?? function( $value ) { return $value; };
-		$this->alter[] = $index ?? function( $value, $index ) { return $index; };
+		$this->alter = [ $value, $index ];
 	}
 
 	/**
@@ -59,19 +60,19 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function __clone()
 	{
-		$this->index =
-		$this->cache = null;
+		$this->index = 0;
+		$this->cache = [ false, false, false, null, null ];
 	}
 
 	/**
-	 * @return array | null
+	 * @return array
 	 */
-	protected function fetch() : ?array
+	protected function fetch() : array
 	{
 		if( $this->array->valid() ) {
-			return [ $this->array->current(), $this->array->key(), $this->index ];
+			return [ true, true, true, null, null, $this->array->current(), $this->array->key() ];
 		} else {
-			return null;
+			return [ false, false, false, null, null ];
 		}
 	}
 
@@ -106,7 +107,7 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function valid() : bool
 	{
-		return isset( $this->cache );
+		return $this->cache[0];
 	}
 
 	/**
@@ -114,7 +115,12 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function current()
 	{
-		return ( $this->alter[0] )( ...$this->cache );
+		if( $this->cache[1] ) {
+			$this->cache[3] = $this->alter[0] ? ( $this->alter[0] )( $this->cache[5], $this->cache[6], $this->index ) : $this->cache[5];
+			$this->cache[1] = false;
+		}
+
+		return $this->cache[3];
 	}
 
 	/**
@@ -122,7 +128,12 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function key()
 	{
-		return ( $this->alter[1] )( ...$this->cache );
+		if( $this->cache[2] ) {
+			$this->cache[4] = $this->alter[1] ? ( $this->alter[1] )( $this->cache[5], $this->cache[6], $this->index ) : $this->cache[6];
+			$this->cache[2] = false;
+		}
+
+		return $this->cache[4];
 	}
 
 	/**

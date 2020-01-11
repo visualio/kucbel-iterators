@@ -75,42 +75,42 @@ class ArrayIterator implements ArrayAccess, Countable, Iterator
 	}
 
 	/**
-	 * @param mixed $offset
+	 * @param mixed $index
 	 * @return bool
 	 */
-	function offsetExists( $offset ) : bool
+	function offsetExists( $index ) : bool
 	{
-		return array_key_exists( $offset, $this->array );
+		return isset( $this->array[ $index ] );
 	}
 
 	/**
-	 * @param mixed $offset
+	 * @param mixed $index
 	 * @return mixed
 	 */
-	function offsetGet( $offset )
+	function offsetGet( $index )
 	{
-		return $this->array[ $offset ];
+		return $this->array[ $index ];
 	}
 
 	/**
-	 * @param mixed $offset
+	 * @param mixed $index
 	 * @param mixed $value
 	 */
-	function offsetSet( $offset, $value ) : void
+	function offsetSet( $index, $value ) : void
 	{
-		if( $offset === null ) {
+		if( $index === null ) {
 			$this->array[] = $value;
 		} else {
-			$this->array[ $offset ] = $value;
+			$this->array[ $index ] = $value;
 		}
 	}
 
 	/**
-	 * @param mixed $offset
+	 * @param mixed $index
 	 */
-	function offsetUnset( $offset ) : void
+	function offsetUnset( $index ) : void
 	{
-		unset( $this->array[ $offset ] );
+		unset( $this->array[ $index ] );
 	}
 
 	/**

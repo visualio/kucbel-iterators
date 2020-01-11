@@ -30,9 +30,9 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	protected $empty;
 
 	/**
-	 * @var int | null
+	 * @var int
 	 */
-	protected $index;
+	protected $index = 0;
 
 	/**
 	 * AppendIterator constructor.
@@ -58,7 +58,7 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	 */
 	function __clone()
 	{
-		$this->index = null;
+		$this->index = 0;
 		$this->array = $this->empty;
 	}
 

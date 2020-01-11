@@ -20,31 +20,28 @@ class LimitIterator implements Countable, Iterator
 	/**
 	 * @var int
 	 */
-	protected $start;
+	protected $count;
 
 	/**
 	 * @var int
 	 */
-	protected $abort;
+	protected $index = 0;
 
 	/**
-	 * @var int | null
+	 * @var array
 	 */
-	protected $index;
+	protected $cache = [ false, null, null ];
 
 	/**
 	 * LimitIterator constructor.
 	 *
 	 * @param iterable $array
 	 * @param int $count
-	 * @param int $start
 	 */
-	function __construct( iterable $array, int $count, int $start = 0 )
+	function __construct( iterable $array, int $count )
 	{
 		if( $count <= 0 ) {
 			throw new InvalidArgumentException('Count must be 1 or greater.');
-		} elseif( $start < 0 ) {
-			throw new InvalidArgumentException('Start must be 0 or greater.');
 		}
 
 		if( is_array( $array )) {
@@ -52,8 +49,28 @@ class LimitIterator implements Countable, Iterator
 		}
 
 		$this->array = $array;
-		$this->start = $start;
-		$this->abort = $start + $count;
+		$this->count = $count;
+	}
+
+	/**
+	 * LimitIterator cloner.
+	 */
+	function __clone()
+	{
+		$this->index = 0;
+		$this->cache = [ false, null, null ];
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function fetch() : array
+	{
+		if( $this->index < $this->count and $this->array->valid() ) {
+			return [ true, $this->array->current(), $this->array->key() ];
+		} else {
+			return [ false, null, null ];
+		}
 	}
 
 	/**
@@ -67,13 +84,8 @@ class LimitIterator implements Countable, Iterator
 
 		$this->array->rewind();
 
-		for( $this->index = 0; $this->index < $this->start; $this->index++ ) {
-			if( $this->array->valid() ) {
-				$this->array->next();
-			} else {
-				break;
-			}
-		}
+		$this->index = 0;
+		$this->cache = $this->fetch();
 	}
 
 	/**
@@ -81,11 +93,10 @@ class LimitIterator implements Countable, Iterator
 	 */
 	function next() : void
 	{
-		if( $this->index < $this->abort ) {
-			$this->index++;
+		$this->array->next();
 
-			$this->array->next();
-		}
+		$this->index++;
+		$this->cache = $this->fetch();
 	}
 
 	/**
@@ -93,23 +104,23 @@ class LimitIterator implements Countable, Iterator
 	 */
 	function valid() : bool
 	{
-		return $this->array->valid() and $this->index < $this->abort;
+		return $this->cache[0];
 	}
 
 	/**
-	 * @return mixed
+	 * @return mixed | null
 	 */
 	function current()
 	{
-		return $this->array->current();
+		return $this->cache[1];
 	}
 
 	/**
-	 * @return mixed
+	 * @return mixed | null
 	 */
 	function key()
 	{
-		return $this->array->key();
+		return $this->cache[2];
 	}
 
 	/**
@@ -118,5 +129,13 @@ class LimitIterator implements Countable, Iterator
 	function count() : int
 	{
 		return iterator_count( $this );
+	}
+
+	/**
+	 * @return array
+	 */
+	function toArray() : array
+	{
+		return iterator_to_array( $this );
 	}
 }
