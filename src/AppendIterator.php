@@ -42,6 +42,10 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	function __construct( iterable ...$arrays )
 	{
 		foreach( $arrays as $array ) {
+			if( !$array ) {
+				continue;
+			}
+			
 			if( is_array( $array )) {
 				$array = new ArrayIterator( $array );
 			}
@@ -157,35 +161,39 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	}
 
 	/**
-	 * @param mixed $offset
+	 * @param mixed $index
 	 * @return bool
 	 */
-	function offsetExists( $offset ) : bool
+	function offsetExists( $index ) : bool
 	{
-		return isset( $this->queue[ $offset ] );
+		return isset( $this->queue[ $index ] );
 	}
 
 	/**
-	 * @param mixed $offset
+	 * @param mixed $index
 	 * @return Iterator
 	 */
-	function offsetGet( $offset )
+	function offsetGet( $index )
 	{
-		return $this->queue[ $offset ];
+		return $this->queue[ $index ];
 	}
 
 	/**
-	 * @param mixed $offset
+	 * @param mixed $index
 	 * @param mixed $value
 	 */
-	function offsetSet( $offset, $value )
+	function offsetSet( $index, $value )
 	{
-		if( !is_null( $offset )) {
+		if( !is_null( $index )) {
 			throw new InvalidArgumentException("Offset must be null.");
 		} elseif( !is_iterable( $value )) {
 			throw new InvalidArgumentException("Value must be iterable.");
 		}
 
+		if( !$value ) {
+			return;
+		} 
+		
 		if( is_array( $value )) {
 			$value = new ArrayIterator( $value );
 		}
@@ -194,9 +202,9 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	}
 
 	/**
-	 * @param mixed $offset
+	 * @param mixed $index
 	 */
-	function offsetUnset( $offset )
+	function offsetUnset( $index )
 	{
 		throw new MemberAccessException("This is AppendIterator.");
 	}
