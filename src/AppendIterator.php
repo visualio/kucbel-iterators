@@ -25,11 +25,6 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	protected $array;
 
 	/**
-	 * @var Iterator
-	 */
-	protected $empty;
-
-	/**
 	 * @var int
 	 */
 	protected $index = 0;
@@ -53,8 +48,7 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 			$this->queue[] = $array;
 		}
 
-		$this->array =
-		$this->empty = new VoidIterator;
+		$this->array = new VoidIterator;
 	}
 
 	/**
@@ -63,11 +57,12 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	function __clone()
 	{
 		$this->index = 0;
-		$this->array = $this->empty;
+		$this->array = new VoidIterator;
 	}
 
 	/**
 	 * @return Iterator | null
+	 * @throws
 	 */
 	protected function fetch() : ?Iterator
 	{
@@ -91,10 +86,10 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	{
 		$this->index = 0;
 
-		if( $this->array = $this->fetch() ) {
-			$this->array->rewind();
-		} else {
-			$this->array = $this->empty;
+		if( $array = $this->fetch() ) {
+			$array->rewind();
+
+			$this->array = $array;
 		}
 	}
 
@@ -108,10 +103,12 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 		while( !$this->array->valid() ) {
 			$this->index++;
 
-			if( $this->array = $this->fetch() ) {
-				$this->array->rewind();
+			if( $array = $this->fetch() ) {
+				$array->rewind();
+
+				$this->array = $array;
 			} else {
-				$this->array = $this->empty;
+				$this->index--;
 
 				break;
 			}
@@ -184,15 +181,15 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	 */
 	function offsetSet( $index, $value )
 	{
+		if( !$value ) {
+			return;
+		}
+
 		if( !is_null( $index )) {
-			throw new InvalidArgumentException("Offset must be null.");
+			throw new InvalidArgumentException("Index must be null.");
 		} elseif( !is_iterable( $value )) {
 			throw new InvalidArgumentException("Value must be iterable.");
 		}
-
-		if( !$value ) {
-			return;
-		} 
 		
 		if( is_array( $value )) {
 			$value = new ArrayIterator( $value );
