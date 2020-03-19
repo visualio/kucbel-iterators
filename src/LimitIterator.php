@@ -75,6 +75,7 @@ class LimitIterator implements Countable, Iterator
 
 	/**
 	 * @return void
+	 * @throws
 	 */
 	function rewind() : void
 	{

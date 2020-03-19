@@ -5,7 +5,6 @@ namespace Kucbel\Iterators;
 use Countable;
 use Iterator;
 use IteratorAggregate;
-use Nette\InvalidArgumentException;
 use Nette\SmartObject;
 
 class ModifyIterator implements Countable, Iterator
@@ -18,7 +17,7 @@ class ModifyIterator implements Countable, Iterator
 	protected $array;
 
 	/**
-	 * @var callable[] | null[]
+	 * @var callable
 	 */
 	protected $alter;
 
@@ -28,31 +27,26 @@ class ModifyIterator implements Countable, Iterator
 	protected $index = 0;
 
 	/**
-	 * Exist, Map value, Map index, New value, New index, Old value, Old index
+	 * Exist, Alter, Value?, Index?, Round?
 	 *
 	 * @var array
 	 */
-	protected $cache = [ false, false, false, null, null ];
+	protected $cache = [ false, false ];
 
 	/**
 	 * ModifyIterator constructor.
 	 *
 	 * @param iterable $array
-	 * @param callable $value
-	 * @param callable $index
+	 * @param callable $alter
 	 */
-	function __construct( iterable $array, callable $value = null, callable $index = null )
+	function __construct( iterable $array, callable $alter )
 	{
-		if( !$value and !$index ) {
-			throw new InvalidArgumentException("Callback must be provided.");
-		}
-
 		if( is_array( $array )) {
 			$array = new ArrayIterator( $array );
 		}
 
 		$this->array = $array;
-		$this->alter = [ $value, $index ];
+		$this->alter = $alter;
 	}
 
 	/**
@@ -61,7 +55,7 @@ class ModifyIterator implements Countable, Iterator
 	function __clone()
 	{
 		$this->index = 0;
-		$this->cache = [ false, false, false, null, null ];
+		$this->cache = [ false, false ];
 	}
 
 	/**
@@ -70,14 +64,34 @@ class ModifyIterator implements Countable, Iterator
 	protected function fetch() : array
 	{
 		if( $this->array->valid() ) {
-			return [ true, true, true, null, null, $this->array->current(), $this->array->key() ];
+			return [ true, true, $this->array->current(), $this->array->key(), $this->index ];
 		} else {
-			return [ false, false, false, null, null ];
+			return [ false, false ];
+		}
+	}
+
+	/**
+	 * @param int $fetch
+	 * @return mixed
+	 */
+	protected function modify( int $fetch )
+	{
+		if( $this->cache[1] ) {
+			$this->cache[1] = false;
+
+			( $this->alter )( $this->cache[2], $this->cache[3], $this->cache[4] );
+		}
+
+		if( $this->cache[0] ) {
+			return $this->cache[ $fetch ];
+		} else {
+			return null;
 		}
 	}
 
 	/**
 	 * @return void
+	 * @throws
 	 */
 	function rewind() : void
 	{
@@ -115,12 +129,7 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function current()
 	{
-		if( $this->cache[1] ) {
-			$this->cache[3] = $this->alter[0] ? ( $this->alter[0] )( $this->cache[5], $this->cache[6], $this->index ) : $this->cache[5];
-			$this->cache[1] = false;
-		}
-
-		return $this->cache[3];
+		return $this->modify( 2 );
 	}
 
 	/**
@@ -128,12 +137,7 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function key()
 	{
-		if( $this->cache[2] ) {
-			$this->cache[4] = $this->alter[1] ? ( $this->alter[1] )( $this->cache[5], $this->cache[6], $this->index ) : $this->cache[6];
-			$this->cache[2] = false;
-		}
-
-		return $this->cache[4];
+		return $this->modify( 3 );
 	}
 
 	/**
