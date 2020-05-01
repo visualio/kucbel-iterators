@@ -2,9 +2,9 @@
 
 namespace Kucbel\Iterators;
 
+use Countable;
 use Iterator;
 use IteratorAggregate;
-use Countable;
 use Nette\InvalidArgumentException;
 use Nette\SmartObject;
 
@@ -20,28 +20,36 @@ class LimitIterator implements Countable, Iterator
 	/**
 	 * @var int
 	 */
-	protected $count;
+	protected $limit;
 
 	/**
 	 * @var int
 	 */
-	protected $index = 0;
+	protected $first;
 
 	/**
-	 * @var array
+	 * @var int
 	 */
-	protected $cache = [ false, null, null ];
+	protected $count = 0;
+
+	/**
+	 * @var bool
+	 */
+	protected $exist = false;
 
 	/**
 	 * LimitIterator constructor.
 	 *
 	 * @param iterable $array
-	 * @param int $count
+	 * @param int $limit
+	 * @param int $first
 	 */
-	function __construct( iterable $array, int $count )
+	function __construct( iterable $array, int $limit, int $first = 0 )
 	{
-		if( $count <= 0 ) {
-			throw new InvalidArgumentException('Count must be 1 or greater.');
+		if( $limit < 0 ) {
+			throw new InvalidArgumentException('Limit must be positive number.');
+		} elseif( $first < 0 ) {
+			throw new InvalidArgumentException('First must be positive number.');
 		}
 
 		if( is_array( $array )) {
@@ -49,7 +57,8 @@ class LimitIterator implements Countable, Iterator
 		}
 
 		$this->array = $array;
-		$this->count = $count;
+		$this->limit = $first + $limit;
+		$this->first = $first;
 	}
 
 	/**
@@ -57,20 +66,8 @@ class LimitIterator implements Countable, Iterator
 	 */
 	function __clone()
 	{
-		$this->index = 0;
-		$this->cache = [ false, null, null ];
-	}
-
-	/**
-	 * @return array
-	 */
-	protected function fetch() : array
-	{
-		if( $this->index < $this->count and $this->array->valid() ) {
-			return [ true, $this->array->current(), $this->array->key() ];
-		} else {
-			return [ false, null, null ];
-		}
+		$this->count = 0;
+		$this->exist = false;
 	}
 
 	/**
@@ -85,8 +82,23 @@ class LimitIterator implements Countable, Iterator
 
 		$this->array->rewind();
 
-		$this->index = 0;
-		$this->cache = $this->fetch();
+		$this->count = 0;
+
+		while( $this->count < $this->first ) {
+			if( $this->array->valid() ) {
+				$this->array->next();
+
+				$this->count++;
+			} else {
+				break;
+			}
+		}
+
+		if( $this->count === $this->first and $this->count < $this->limit ) {
+			$this->exist = $this->array->valid();
+		} else {
+			$this->exist = false;
+		}
 	}
 
 	/**
@@ -94,10 +106,17 @@ class LimitIterator implements Countable, Iterator
 	 */
 	function next() : void
 	{
-		$this->array->next();
+		if( $this->count >= $this->first ) {
+			$this->count++;
 
-		$this->index++;
-		$this->cache = $this->fetch();
+			if( $this->count < $this->limit ) {
+				$this->array->next();
+
+				$this->exist = $this->array->valid();
+			} else {
+				$this->exist = false;
+			}
+		}
 	}
 
 	/**
@@ -105,23 +124,23 @@ class LimitIterator implements Countable, Iterator
 	 */
 	function valid() : bool
 	{
-		return $this->cache[0];
+		return $this->exist;
 	}
 
 	/**
-	 * @return mixed | null
+	 * @return mixed
 	 */
 	function current()
 	{
-		return $this->cache[1];
+		return $this->array->current();
 	}
 
 	/**
-	 * @return mixed | null
+	 * @return mixed
 	 */
 	function key()
 	{
-		return $this->cache[2];
+		return $this->array->key();
 	}
 
 	/**

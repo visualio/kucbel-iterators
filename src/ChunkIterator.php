@@ -12,10 +12,6 @@ class ChunkIterator implements Countable, Iterator
 {
 	use SmartObject;
 
-	const
-		INDEX	= 0b1,
-		COUNT	= 0b10;
-
 	/**
 	 * @var Iterator | IteratorAggregate
 	 */
@@ -24,34 +20,34 @@ class ChunkIterator implements Countable, Iterator
 	/**
 	 * @var int
 	 */
-	protected $count;
+	protected $chunk;
 
 	/**
 	 * @var int
+	 */
+	protected $count = 0;
+
+	/**
+	 * @var bool
 	 */
 	protected $assoc;
 
 	/**
-	 * @var int
-	 */
-	protected $index = 0;
-
-	/**
 	 * @var array
 	 */
-	protected $cache = [];
+	protected $value = [];
 
 	/**
 	 * ChunkIterator constructor.
 	 *
 	 * @param iterable $array
-	 * @param int $count
-	 * @param int $assoc
+	 * @param int $chunk
+	 * @param bool $assoc
 	 */
-	function __construct( iterable $array, int $count, int $assoc = self::COUNT )
+	function __construct( iterable $array, int $chunk, bool $assoc = false )
 	{
-		if( $count < 2 ) {
-			throw new InvalidArgumentException("Count must be 2 or greater.");
+		if( $chunk < 2 ) {
+			throw new InvalidArgumentException("Chunk must be greater then 1.");
 		}
 
 		if( is_array( $array )) {
@@ -59,7 +55,7 @@ class ChunkIterator implements Countable, Iterator
 		}
 
 		$this->array = $array;
-		$this->count = $count;
+		$this->chunk = $chunk;
 		$this->assoc = $assoc;
 	}
 
@@ -68,8 +64,8 @@ class ChunkIterator implements Countable, Iterator
 	 */
 	function __clone()
 	{
-		$this->index = 0;
-		$this->cache = [];
+		$this->count = 0;
+		$this->value = [];
 	}
 
 	/**
@@ -77,22 +73,21 @@ class ChunkIterator implements Countable, Iterator
 	 */
 	protected function fetch() : array
 	{
-		$assoc = $this->assoc & self::INDEX ? false : true;
-		$cache = [];
+		$value = [];
 		$count = 0;
 
 		while( $this->array->valid() ) {
-			$index = $assoc ? $count : $this->array->key();
-			$cache[ $index ] = $this->array->current();
+			$index = $this->assoc ? $this->array->key() : $count;
+			$value[ $index ] = $this->array->current();
 
-			if( ++$count === $this->count ) {
+			if( ++$count === $this->chunk ) {
 				break;
 			}
 
 			$this->array->next();
 		}
 
-		return $cache;
+		return $value;
 	}
 
 	/**
@@ -107,8 +102,8 @@ class ChunkIterator implements Countable, Iterator
 
 		$this->array->rewind();
 
-		$this->index = 0;
-		$this->cache = $this->fetch();
+		$this->count = 0;
+		$this->value = $this->fetch();
 	}
 
 	/**
@@ -118,8 +113,8 @@ class ChunkIterator implements Countable, Iterator
 	{
 		$this->array->next();
 
-		$this->index++;
-		$this->cache = $this->fetch();
+		$this->count++;
+		$this->value = $this->fetch();
 	}
 
 	/**
@@ -127,23 +122,23 @@ class ChunkIterator implements Countable, Iterator
 	 */
 	function valid() : bool
 	{
-		return $this->cache ? true : false;
+		return $this->value ? true : false;
 	}
 
 	/**
 	 * @return array
 	 */
-	function current()
+	function current() : array
 	{
-		return $this->cache;
+		return $this->value;
 	}
 
 	/**
 	 * @return int
 	 */
-	function key()
+	function key() : int
 	{
-		return $this->index;
+		return $this->count;
 	}
 
 	/**
@@ -157,7 +152,7 @@ class ChunkIterator implements Countable, Iterator
 			$count = iterator_count( $this->array );
 		}
 
-		return ceil( $count / $this->count );
+		return ceil( $count / $this->chunk );
 	}
 
 	/**

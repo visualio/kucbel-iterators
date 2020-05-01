@@ -24,12 +24,22 @@ class FilterIterator implements Countable, Iterator
 	/**
 	 * @var int
 	 */
-	protected $index = 0;
+	protected $count = 0;
 
 	/**
-	 * @var array
+	 * @var bool
 	 */
-	protected $cache = [ false, null, null ];
+	protected $exist = false;
+
+	/**
+	 * @var mixed
+	 */
+	protected $value;
+
+	/**
+	 * @var mixed
+	 */
+	protected $index;
 
 	/**
 	 * FilterIterator constructor.
@@ -52,27 +62,31 @@ class FilterIterator implements Countable, Iterator
 	 */
 	function __clone()
 	{
-		$this->index = 0;
-		$this->cache = [ false, null, null ];
+		$this->count = 0;
+		$this->exist = false;
+		$this->value =
+		$this->index = null;
 	}
 
 	/**
-	 * @return array
+	 * @return bool
 	 */
-	protected function fetch() : array
+	protected function match() : bool
 	{
-		while( $this->array->valid() ) {
-			$index = $this->array->key();
-			$value = $this->array->current();
+		$count = $this->count;
 
-			if(( $this->match )( $value, $index, $this->index )) {
-				return [ true, $value, $index ];
+		while( $this->array->valid() ) {
+			$this->value = $this->array->current();
+			$this->index = $this->array->key();
+
+			if(( $this->match )( $this->value, $this->index, $count )) {
+				return true;
 			}
 
 			$this->array->next();
 		}
 
-		return [ false, null, null ];
+		return false;
 	}
 
 	/**
@@ -87,8 +101,8 @@ class FilterIterator implements Countable, Iterator
 
 		$this->array->rewind();
 
-		$this->index = 0;
-		$this->cache = $this->fetch();
+		$this->count = 0;
+		$this->exist = $this->match();
 	}
 
 	/**
@@ -98,8 +112,8 @@ class FilterIterator implements Countable, Iterator
 	{
 		$this->array->next();
 
-		$this->index++;
-		$this->cache = $this->fetch();
+		$this->count++;
+		$this->exist = $this->match();
 	}
 
 	/**
@@ -107,7 +121,7 @@ class FilterIterator implements Countable, Iterator
 	 */
 	function valid() : bool
 	{
-		return $this->cache[0];
+		return $this->exist;
 	}
 
 	/**
@@ -115,7 +129,7 @@ class FilterIterator implements Countable, Iterator
 	 */
 	function current()
 	{
-		return $this->cache[1];
+		return $this->value;
 	}
 
 	/**
@@ -123,7 +137,7 @@ class FilterIterator implements Countable, Iterator
 	 */
 	function key()
 	{
-		return $this->cache[2];
+		return $this->index;
 	}
 
 	/**

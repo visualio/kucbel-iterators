@@ -24,14 +24,27 @@ class ModifyIterator implements Countable, Iterator
 	/**
 	 * @var int
 	 */
-	protected $index = 0;
+	protected $count = 0;
 
 	/**
-	 * Exist, Alter, Value?, Index?, Round?
-	 *
-	 * @var array
+	 * @var bool
 	 */
-	protected $cache = [ false, false ];
+	protected $exist = false;
+
+	/**
+	 * @var bool
+	 */
+	protected $defer = false;
+
+	/**
+	 * @var mixed
+	 */
+	protected $value;
+
+	/**
+	 * @var mixed
+	 */
+	protected $index;
 
 	/**
 	 * ModifyIterator constructor.
@@ -54,38 +67,26 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function __clone()
 	{
-		$this->index = 0;
-		$this->cache = [ false, false ];
+		$this->count = 0;
+		$this->exist =
+		$this->defer = false;
+		$this->value =
+		$this->index = null;
 	}
 
 	/**
-	 * @return array
+	 * @return void
 	 */
-	protected function fetch() : array
+	protected function modify() : void
 	{
-		if( $this->array->valid() ) {
-			return [ true, true, $this->array->current(), $this->array->key(), $this->index ];
-		} else {
-			return [ false, false ];
-		}
-	}
+		if( $this->defer ) {
+			$this->defer = false;
+			$this->value = $this->array->current();
+			$this->index = $this->array->key();
 
-	/**
-	 * @param int $fetch
-	 * @return mixed
-	 */
-	protected function modify( int $fetch )
-	{
-		if( $this->cache[1] ) {
-			$this->cache[1] = false;
+			$count = $this->count;
 
-			( $this->alter )( $this->cache[2], $this->cache[3], $this->cache[4] );
-		}
-
-		if( $this->cache[0] ) {
-			return $this->cache[ $fetch ];
-		} else {
-			return null;
+			( $this->alter )( $this->value, $this->index, $count );
 		}
 	}
 
@@ -101,8 +102,9 @@ class ModifyIterator implements Countable, Iterator
 
 		$this->array->rewind();
 
-		$this->index = 0;
-		$this->cache = $this->fetch();
+		$this->count = 0;
+		$this->exist =
+		$this->defer = $this->array->valid();
 	}
 
 	/**
@@ -112,8 +114,9 @@ class ModifyIterator implements Countable, Iterator
 	{
 		$this->array->next();
 
-		$this->index++;
-		$this->cache = $this->fetch();
+		$this->count++;
+		$this->exist =
+		$this->defer = $this->array->valid();
 	}
 
 	/**
@@ -121,7 +124,7 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function valid() : bool
 	{
-		return $this->cache[0];
+		return $this->exist;
 	}
 
 	/**
@@ -129,7 +132,9 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function current()
 	{
-		return $this->modify( 2 );
+		$this->modify();
+
+		return $this->value;
 	}
 
 	/**
@@ -137,7 +142,9 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function key()
 	{
-		return $this->modify( 3 );
+		$this->modify();
+
+		return $this->index;
 	}
 
 	/**
