@@ -46,8 +46,8 @@ class ChunkIterator implements Countable, Iterator
 	 */
 	function __construct( iterable $array, int $chunk, bool $assoc = false )
 	{
-		if( $chunk < 2 ) {
-			throw new InvalidArgumentException("Chunk must be greater then 1.");
+		if( $chunk < 1 ) {
+			throw new InvalidArgumentException("Chunk must be positive number.");
 		}
 
 		if( is_array( $array )) {
