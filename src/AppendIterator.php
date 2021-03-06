@@ -27,7 +27,7 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	/**
 	 * @var int
 	 */
-	protected $index = 0;
+	protected $count = 0;
 
 	/**
 	 * AppendIterator constructor.
@@ -56,24 +56,25 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	 */
 	function __clone()
 	{
-		$this->index = 0;
+		$this->count = 0;
 		$this->array = new VoidIterator;
 	}
 
 	/**
+	 * @param int $count
 	 * @return Iterator | null
 	 * @throws
 	 */
-	protected function fetch() : ?Iterator
+	protected function fetch( int $count ) : ?Iterator
 	{
-		$array = $this->queue[ $this->index ] ?? null;
+		$array = $this->queue[ $count ] ?? null;
 
 		if( $array ) {
 			while( $array instanceof IteratorAggregate ) {
 				$array = $array->getIterator();
 			}
 
-			return $this->queue[ $this->index ] = $array;
+			return $this->queue[ $count ] = $array;
 		} else {
 			return null;
 		}
@@ -84,9 +85,9 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	 */
 	function rewind() : void
 	{
-		$this->index = 0;
+		$this->count = 0;
 
-		if( $array = $this->fetch() ) {
+		if( $array = $this->fetch( $this->count )) {
 			$array->rewind();
 
 			$this->array = $array;
@@ -101,15 +102,12 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 		$this->array->next();
 
 		while( !$this->array->valid() ) {
-			$this->index++;
-
-			if( $array = $this->fetch() ) {
+			if( $array = $this->fetch( $this->count + 1 )) {
 				$array->rewind();
 
 				$this->array = $array;
+				$this->count++;
 			} else {
-				$this->index--;
-
 				break;
 			}
 		}
