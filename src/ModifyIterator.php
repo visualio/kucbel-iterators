@@ -34,7 +34,7 @@ class ModifyIterator implements Countable, Iterator
 	/**
 	 * @var bool
 	 */
-	protected $defer = false;
+	protected $delay = false;
 
 	/**
 	 * @var mixed
@@ -69,7 +69,7 @@ class ModifyIterator implements Countable, Iterator
 	{
 		$this->count = 0;
 		$this->exist =
-		$this->defer = false;
+		$this->delay = false;
 		$this->value =
 		$this->index = null;
 	}
@@ -79,8 +79,8 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	protected function modify() : void
 	{
-		if( $this->defer ) {
-			$this->defer = false;
+		if( $this->delay ) {
+			$this->delay = false;
 			$this->value = $this->array->current();
 			$this->index = $this->array->key();
 
@@ -104,7 +104,7 @@ class ModifyIterator implements Countable, Iterator
 
 		$this->count = 0;
 		$this->exist =
-		$this->defer = $this->array->valid();
+		$this->delay = $this->array->valid();
 	}
 
 	/**
@@ -116,7 +116,7 @@ class ModifyIterator implements Countable, Iterator
 
 		$this->count++;
 		$this->exist =
-		$this->defer = $this->array->valid();
+		$this->delay = $this->array->valid();
 	}
 
 	/**
