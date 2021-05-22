@@ -152,6 +152,10 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function count() : int
 	{
+		while( $this->array instanceof IteratorAggregate ) {
+			$this->array = $this->array->getIterator();
+		}
+
 		if( $this->array instanceof Countable ) {
 			return $this->array->count();
 		} else {

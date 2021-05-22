@@ -146,6 +146,10 @@ class ChunkIterator implements Countable, Iterator
 	 */
 	function count() : int
 	{
+		while( $this->array instanceof IteratorAggregate ) {
+			$this->array = $this->array->getIterator();
+		}
+
 		if( $this->array instanceof Countable ) {
 			$count = $this->array->count();
 		} else {
