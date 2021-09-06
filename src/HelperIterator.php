@@ -8,6 +8,11 @@ use IteratorAggregate;
 use Nette\InvalidArgumentException;
 use Nette\SmartObject;
 
+/**
+ * Class HelperIterator
+ *
+ * @deprecated buggy isFirst()
+ */
 class HelperIterator implements Countable, Iterator
 {
 	use SmartObject;
