@@ -21,9 +21,9 @@ class ArrayIterator implements ArrayAccess, Countable, Iterator
 	 *
 	 * @param array $array
 	 */
-	function __construct( array $array = null )
+	function __construct( array $array = [] )
 	{
-		$this->array = $array ?? [];
+		$this->array = $array;
 	}
 
 	/**
