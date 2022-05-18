@@ -67,6 +67,7 @@ class ModifyIterator implements Countable, Iterator
 	 */
 	function __clone()
 	{
+		$this->array = clone $this->array;
 		$this->count = 0;
 		$this->exist =
 		$this->delay = false;
@@ -130,7 +131,7 @@ class ModifyIterator implements Countable, Iterator
 	/**
 	 * @return mixed
 	 */
-	function current()
+	function current() : mixed
 	{
 		$this->modify();
 
@@ -140,7 +141,7 @@ class ModifyIterator implements Countable, Iterator
 	/**
 	 * @return mixed
 	 */
-	function key()
+	function key() : mixed
 	{
 		$this->modify();
 

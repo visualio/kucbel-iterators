@@ -66,6 +66,7 @@ class HelperIterator implements Countable, Iterator
 	 */
 	function __clone()
 	{
+		$this->array = clone $this->array;
 		$this->cache = [];
 		$this->count = 0;
 		$this->exist = false;
@@ -167,7 +168,7 @@ class HelperIterator implements Countable, Iterator
 	/**
 	 * @return mixed
 	 */
-	function current()
+	function current() : mixed
 	{
 		return $this->value;
 	}
@@ -175,7 +176,7 @@ class HelperIterator implements Countable, Iterator
 	/**
 	 * @return mixed
 	 */
-	function key()
+	function key() : mixed
 	{
 		return $this->index;
 	}
@@ -221,33 +222,33 @@ class HelperIterator implements Countable, Iterator
 	}
 
 	/**
-	 * @return mixed | null
+	 * @return mixed
 	 */
-	function getPreceding()
+	function getPreceding() : mixed
 	{
 		return $this->cache[ $this->count - 1 ][1] ?? null;
 	}
 
 	/**
-	 * @return mixed | null
+	 * @return mixed
 	 */
-	function getFollowing()
+	function getFollowing() : mixed
 	{
 		return $this->cache[ $this->count + 1 ][1] ?? null;
 	}
 
 	/**
-	 * @return mixed | null
+	 * @return mixed
 	 */
-	function getPrecedingKey()
+	function getPrecedingKey() : mixed
 	{
 		return $this->cache[ $this->count - 1 ][0] ?? null;
 	}
 
 	/**
-	 * @return mixed | null
+	 * @return mixed
 	 */
-	function getFollowingKey()
+	function getFollowingKey() : mixed
 	{
 		return $this->cache[ $this->count + 1 ][0] ?? null;
 	}

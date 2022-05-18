@@ -53,7 +53,7 @@ class ArrayIterator implements ArrayAccess, Countable, Iterator
 	/**
 	 * @return mixed
 	 */
-	function current()
+	function current() : mixed
 	{
 		return current( $this->array );
 	}
@@ -61,7 +61,7 @@ class ArrayIterator implements ArrayAccess, Countable, Iterator
 	/**
 	 * @return mixed
 	 */
-	function key()
+	function key() : mixed
 	{
 		return key( $this->array );
 	}
@@ -78,7 +78,7 @@ class ArrayIterator implements ArrayAccess, Countable, Iterator
 	 * @param mixed $index
 	 * @return bool
 	 */
-	function offsetExists( $index ) : bool
+	function offsetExists( mixed $index ) : bool
 	{
 		return isset( $this->array[ $index ] );
 	}
@@ -87,7 +87,7 @@ class ArrayIterator implements ArrayAccess, Countable, Iterator
 	 * @param mixed $index
 	 * @return mixed
 	 */
-	function offsetGet( $index )
+	function offsetGet( mixed $index ) : mixed
 	{
 		return $this->array[ $index ];
 	}
@@ -96,7 +96,7 @@ class ArrayIterator implements ArrayAccess, Countable, Iterator
 	 * @param mixed $index
 	 * @param mixed $value
 	 */
-	function offsetSet( $index, $value ) : void
+	function offsetSet( mixed $index, mixed $value ) : void
 	{
 		if( $index === null ) {
 			$this->array[] = $value;
@@ -108,7 +108,7 @@ class ArrayIterator implements ArrayAccess, Countable, Iterator
 	/**
 	 * @param mixed $index
 	 */
-	function offsetUnset( $index ) : void
+	function offsetUnset( mixed $index ) : void
 	{
 		unset( $this->array[ $index ] );
 	}

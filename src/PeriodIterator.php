@@ -29,14 +29,14 @@ class PeriodIterator implements Countable, Iterator
 	protected $period;
 
 	/**
-	 * @var DateTime
+	 * @var DateTime | null
 	 */
-	protected $value;
+	protected $value = null;
 
 	/**
 	 * @var int
 	 */
-	protected $index;
+	protected $index = 0;
 
 	/**
 	 * @var bool
@@ -55,9 +55,17 @@ class PeriodIterator implements Countable, Iterator
 		$this->start = clone $start;
 		$this->finish = clone $finish;
 		$this->period = clone $period;
-		$this->invert = $start > $finish;
 
-		$this->rewind();
+		$this->invert = $start > $finish;
+	}
+
+	/**
+	 * PeriodIterator cloner.
+	 */
+	function __clone() : void
+	{
+		$this->value = null;
+		$this->index = 0;
 	}
 
 	/**
@@ -66,7 +74,7 @@ class PeriodIterator implements Countable, Iterator
 	 */
 	function rewind() : void
 	{
-		$this->value = new DateTime( $this->start->format('Y-m-d H:i:s.u'), $this->start->getTimezone() );
+		$this->value = new DateTime( $this->start->format('Y-m-d H:i:s'), $this->start->getTimezone() );
 		$this->index = 0;
 	}
 
@@ -95,17 +103,17 @@ class PeriodIterator implements Countable, Iterator
 	}
 
 	/**
-	 * @return DateTime
+	 * @return DateTime | null
 	 */
-	function current()
+	function current() : DateTime | null
 	{
-		return clone $this->value;
+		return $this->value ? clone $this->value : null;
 	}
 
 	/**
-	 * @return mixed
+	 * @return int
 	 */
-	function key()
+	function key() : int
 	{
 		return $this->index;
 	}

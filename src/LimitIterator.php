@@ -66,6 +66,7 @@ class LimitIterator implements Countable, Iterator
 	 */
 	function __clone()
 	{
+		$this->array = clone $this->array;
 		$this->count = 0;
 		$this->exist = false;
 	}
@@ -130,7 +131,7 @@ class LimitIterator implements Countable, Iterator
 	/**
 	 * @return mixed
 	 */
-	function current()
+	function current() : mixed
 	{
 		return $this->array->current();
 	}
@@ -138,7 +139,7 @@ class LimitIterator implements Countable, Iterator
 	/**
 	 * @return mixed
 	 */
-	function key()
+	function key() : mixed
 	{
 		return $this->array->key();
 	}

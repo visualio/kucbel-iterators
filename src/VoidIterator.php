@@ -37,7 +37,7 @@ class VoidIterator implements Countable, Iterator
 	/**
 	 * @return null
 	 */
-	function current()
+	function current() : mixed
 	{
 		return null;
 	}
@@ -45,7 +45,7 @@ class VoidIterator implements Countable, Iterator
 	/**
 	 * @return null
 	 */
-	function key()
+	function key() : mixed
 	{
 		return null;
 	}

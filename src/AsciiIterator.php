@@ -81,7 +81,7 @@ class AsciiIterator implements Countable, Iterator
 	 */
 	function rewind() : void
 	{
-		$this->warmup();
+		$this->build();
 
 		$this->stream->rewind();
 
@@ -150,7 +150,7 @@ class AsciiIterator implements Countable, Iterator
 	/**
 	 * @return void
 	 */
-	protected function warmup() : void
+	protected function build() : void
 	{
 		if( !$this->accept ) {
 			for( $number = 32; $number <= 126; $number++ ) {

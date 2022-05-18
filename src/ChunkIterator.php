@@ -64,6 +64,7 @@ class ChunkIterator implements Countable, Iterator
 	 */
 	function __clone()
 	{
+		$this->array = clone $this->array;
 		$this->count = 0;
 		$this->value = [];
 	}
@@ -122,7 +123,7 @@ class ChunkIterator implements Countable, Iterator
 	 */
 	function valid() : bool
 	{
-		return $this->value ? true : false;
+		return (bool) $this->value;
 	}
 
 	/**

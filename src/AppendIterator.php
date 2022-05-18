@@ -65,7 +65,7 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	 * @return Iterator | null
 	 * @throws
 	 */
-	protected function fetch( int $count ) : ?Iterator
+	protected function fetch( int $count ) : Iterator | null
 	{
 		$array = $this->queue[ $count ] ?? null;
 
@@ -124,7 +124,7 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	/**
 	 * @return mixed
 	 */
-	function current()
+	function current() : mixed
 	{
 		return $this->array->current();
 	}
@@ -132,7 +132,7 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	/**
 	 * @return mixed
 	 */
-	function key()
+	function key() : mixed
 	{
 		return $this->array->key();
 	}
@@ -159,7 +159,7 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	 * @param mixed $index
 	 * @return bool
 	 */
-	function offsetExists( $index ) : bool
+	function offsetExists( mixed $index ) : bool
 	{
 		return isset( $this->queue[ $index ] );
 	}
@@ -168,7 +168,7 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	 * @param mixed $index
 	 * @return Iterator
 	 */
-	function offsetGet( $index )
+	function offsetGet( mixed $index ) : mixed
 	{
 		return $this->queue[ $index ];
 	}
@@ -177,7 +177,7 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	 * @param mixed $index
 	 * @param mixed $value
 	 */
-	function offsetSet( $index, $value )
+	function offsetSet( mixed $index, mixed $value ) : void
 	{
 		if( !$value ) {
 			return;
@@ -199,9 +199,9 @@ class AppendIterator implements ArrayAccess, Countable, Iterator
 	/**
 	 * @param mixed $index
 	 */
-	function offsetUnset( $index )
+	function offsetUnset( mixed $index ) : void
 	{
-		throw new MemberAccessException("This is AppendIterator.");
+		throw new MemberAccessException("Hello?, this is AppendIterator.");
 	}
 
 	/**
